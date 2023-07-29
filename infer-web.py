@@ -1911,7 +1911,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                 )
                 version19 = gr.Radio(
                     label=i18n("版本"),
-                    choices=["v1", "v2"],
+                    choices=["v2"],
                     value="v2",
                     interactive=True,
                     visible=True,
@@ -2031,12 +2031,12 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                 with gr.Row():
                     pretrained_G14 = gr.Textbox(
                         label=i18n("加载预训练底模G路径"),
-                        value="pretrained/f0G40k.pth",
+                        value="pretrained_v2/f0G40k.pth",
                         interactive=True,
                     )
                     pretrained_D15 = gr.Textbox(
                         label=i18n("加载预训练底模D路径"),
-                        value="pretrained/f0D40k.pth",
+                        value="pretrained_v2/f0D40k.pth",
                         interactive=True,
                     )
                     sr2.change(
