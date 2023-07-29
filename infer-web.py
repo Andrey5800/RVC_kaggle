@@ -1912,7 +1912,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                 version19 = gr.Radio(
                     label=i18n("版本"),
                     choices=["v1", "v2"],
-                    value="v1",
+                    value="v2",
                     interactive=True,
                     visible=True,
                 )
@@ -1989,15 +1989,15 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                         maximum=50,
                         step=1,
                         label=i18n("保存频率save_every_epoch"),
-                        value=5,
+                        value=20,
                         interactive=True,
                     )
                     total_epoch11 = gr.Slider(
                         minimum=0,
-                        maximum=10000,
+                        maximum=3000,
                         step=1,
                         label=i18n("总训练轮数total_epoch"),
-                        value=20,
+                        value=200,
                         interactive=True,
                     )
                     batch_size12 = gr.Slider(
@@ -2011,7 +2011,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                     if_save_latest13 = gr.Radio(
                         label=i18n("是否仅保存最新的ckpt文件以节省硬盘空间"),
                         choices=[i18n("是"), i18n("否")],
-                        value=i18n("否"),
+                        value=i18n("是"),
                         interactive=True,
                     )
                     if_cache_gpu17 = gr.Radio(
@@ -2025,7 +2025,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                     if_save_every_weights18 = gr.Radio(
                         label=i18n("是否在每次保存时间点将最终小模型保存至weights文件夹"),
                         choices=[i18n("是"), i18n("否")],
-                        value=i18n("否"),
+                        value=i18n("是"),
                         interactive=True,
                     )
                 with gr.Row():
