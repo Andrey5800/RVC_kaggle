@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 
-import json # Mangio fork using json for preset saving
+import json  # Mangio fork using json for preset saving
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -291,7 +291,7 @@ def vc_multi(
                 resample_sr,
                 rms_mix_rate,
                 protect,
-                crepe_hop_length
+                crepe_hop_length,
             )
             if "Success" in info:
                 try:
@@ -999,7 +999,7 @@ def train1key(
     if_cache_gpu17,
     if_save_every_weights18,
     version19,
-    echl
+    echl,
 ):
     infos = []
 
@@ -1040,7 +1040,7 @@ def train1key(
             model_log_dir,
             np7,
             f0method8,
-            echl
+            echl,
         )
         yield get_info_str(cmd)
         p = Popen(cmd, shell=True, cwd=now_dir)
@@ -1272,7 +1272,6 @@ def export_onnx(ModelPath, ExportedPath):
 
     device = "cpu"  # 导出时设备（不影响使用模型）
 
-
     net_g = SynthesizerTrnMsNSFsidM(
         *cpt["config"], is_half=False, version=cpt.get("version", "v1")
     )  # fp32导出（C++要支持fp16必须手动将内存重新排列所以暂时不用fp16）
@@ -1308,11 +1307,12 @@ def export_onnx(ModelPath, ExportedPath):
     return "Finished"
 
 
-#region Mangio-RVC-Fork CLI App
+# region Mangio-RVC-Fork CLI App
 import re as regex
 import scipy.io.wavfile as wavfile
 
 cli_current_page = "HOME"
+
 
 def cli_split_command(com):
     exp = r'(?:(?<=\s)|^)"(.*?)"(?=\s|$)|(\S+)'
@@ -1320,8 +1320,11 @@ def cli_split_command(com):
     split_array = [group[0] if group[0] else group[1] for group in split_array]
     return split_array
 
+
 def execute_generator_function(genObject):
-    for _ in genObject: pass
+    for _ in genObject:
+        pass
+
 
 def cli_infer(com):
     # get VC first
@@ -1330,7 +1333,7 @@ def cli_infer(com):
     source_audio_path = com[1]
     output_file_name = com[2]
     feature_index_path = com[3]
-    f0_file = None # Not Implemented Yet
+    f0_file = None  # Not Implemented Yet
 
     # Get parameters for inference
     speaker_id = int(com[4])
@@ -1360,15 +1363,26 @@ def cli_infer(com):
         resample,
         mix,
         protection_amnt,
-        crepe_hop_length,        
+        crepe_hop_length,
     )
     if "Success." in conversion_data[0]:
-        print("Mangio-RVC-Fork Infer-CLI: Inference succeeded. Writing to %s/%s..." % ('audio-outputs', output_file_name))
-        wavfile.write('%s/%s' % ('audio-outputs', output_file_name), conversion_data[1][0], conversion_data[1][1])
-        print("Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name))
+        print(
+            "Mangio-RVC-Fork Infer-CLI: Inference succeeded. Writing to %s/%s..."
+            % ("audio-outputs", output_file_name)
+        )
+        wavfile.write(
+            "%s/%s" % ("audio-outputs", output_file_name),
+            conversion_data[1][0],
+            conversion_data[1][1],
+        )
+        print(
+            "Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s"
+            % ("audio-outputs", output_file_name)
+        )
     else:
         print("Mangio-RVC-Fork Infer-CLI: Inference failed. Here's the traceback: ")
         print(conversion_data[0])
+
 
 def cli_pre_process(com):
     com = cli_split_command(com)
@@ -1379,13 +1393,11 @@ def cli_pre_process(com):
 
     print("Mangio-RVC-Fork Pre-process: Starting...")
     generator = preprocess_dataset(
-        trainset_directory, 
-        model_name, 
-        sample_rate, 
-        num_processes
+        trainset_directory, model_name, sample_rate, num_processes
     )
     execute_generator_function(generator)
     print("Mangio-RVC-Fork Pre-process: Finished")
+
 
 def cli_extract_feature(com):
     com = cli_split_command(com)
@@ -1395,22 +1407,23 @@ def cli_extract_feature(com):
     has_pitch_guidance = True if (int(com[3]) == 1) else False
     f0_method = com[4]
     crepe_hop_length = int(com[5])
-    version = com[6] # v1 or v2
-    
+    version = com[6]  # v1 or v2
+
     print("Mangio-RVC-CLI: Extract Feature Has Pitch: " + str(has_pitch_guidance))
     print("Mangio-RVC-CLI: Extract Feature Version: " + str(version))
     print("Mangio-RVC-Fork Feature Extraction: Starting...")
     generator = extract_f0_feature(
-        gpus, 
-        num_processes, 
-        f0_method, 
-        has_pitch_guidance, 
-        model_name, 
-        version, 
-        crepe_hop_length
+        gpus,
+        num_processes,
+        f0_method,
+        has_pitch_guidance,
+        model_name,
+        version,
+        crepe_hop_length,
     )
     execute_generator_function(generator)
     print("Mangio-RVC-Fork Feature Extraction: Finished")
+
 
 def cli_train(com):
     com = cli_split_command(com)
@@ -1419,7 +1432,7 @@ def cli_train(com):
     has_pitch_guidance = True if (int(com[2]) == 1) else False
     speaker_id = int(com[3])
     save_epoch_iteration = int(com[4])
-    total_epoch = int(com[5]) # 10000
+    total_epoch = int(com[5])  # 10000
     batch_size = int(com[6])
     gpu_card_slot_numbers = com[7]
     if_save_latest = i18n("是") if (int(com[8]) == 1) else i18n("否")
@@ -1427,8 +1440,8 @@ def cli_train(com):
     if_save_every_weight = i18n("是") if (int(com[10]) == 1) else i18n("否")
     version = com[11]
 
-    pretrained_base = "pretrained/" if version == "v1" else "pretrained_v2/" 
-    
+    pretrained_base = "pretrained/" if version == "v1" else "pretrained_v2/"
+
     g_pretrained_path = "%sf0G%s.pth" % (pretrained_base, sample_rate)
     d_pretrained_path = "%sf0D%s.pth" % (pretrained_base, sample_rate)
 
@@ -1447,20 +1460,19 @@ def cli_train(com):
         gpu_card_slot_numbers,
         if_cache_gpu,
         if_save_every_weight,
-        version
+        version,
     )
+
 
 def cli_train_feature(com):
     com = cli_split_command(com)
     model_name = com[0]
     version = com[1]
     print("Mangio-RVC-Fork Train Feature Index-CLI: Training... Please wait")
-    generator = train_index(
-        model_name,
-        version
-    )
+    generator = train_index(model_name, version)
     execute_generator_function(generator)
     print("Mangio-RVC-Fork Train Feature Index-CLI: Done!")
+
 
 def cli_extract_model(com):
     com = cli_split_command(com)
@@ -1471,43 +1483,59 @@ def cli_extract_model(com):
     info = com[4]
     version = com[5]
     extract_small_model_process = extract_small_model(
-        model_path,
-        save_name,
-        sample_rate,
-        has_pitch_guidance,
-        info,
-        version
+        model_path, save_name, sample_rate, has_pitch_guidance, info, version
     )
     if extract_small_model_process == "Success.":
         print("Mangio-RVC-Fork Extract Small Model: Success!")
     else:
-        print(str(extract_small_model_process))        
+        print(str(extract_small_model_process))
         print("Mangio-RVC-Fork Extract Small Model: Failed!")
+
 
 def print_page_details():
     if cli_current_page == "HOME":
         print("    go home            : Takes you back to home with a navigation list.")
         print("    go infer           : Takes you to inference command execution.\n")
-        print("    go pre-process     : Takes you to training step.1) pre-process command execution.")
-        print("    go extract-feature : Takes you to training step.2) extract-feature command execution.")
-        print("    go train           : Takes you to training step.3) being or continue training command execution.")
-        print("    go train-feature   : Takes you to the train feature index command execution.\n")
-        print("    go extract-model   : Takes you to the extract small model command execution.")
+        print(
+            "    go pre-process     : Takes you to training step.1) pre-process command execution."
+        )
+        print(
+            "    go extract-feature : Takes you to training step.2) extract-feature command execution."
+        )
+        print(
+            "    go train           : Takes you to training step.3) being or continue training command execution."
+        )
+        print(
+            "    go train-feature   : Takes you to the train feature index command execution.\n"
+        )
+        print(
+            "    go extract-model   : Takes you to the extract small model command execution."
+        )
     elif cli_current_page == "INFER":
         print("    arg 1) model name with .pth in ./weights: mi-test.pth")
         print("    arg 2) source audio path: myFolder\\MySource.wav")
-        print("    arg 3) output file name to be placed in './audio-outputs': MyTest.wav")
-        print("    arg 4) feature index file path: logs/mi-test/added_IVF3042_Flat_nprobe_1.index")
+        print(
+            "    arg 3) output file name to be placed in './audio-outputs': MyTest.wav"
+        )
+        print(
+            "    arg 4) feature index file path: logs/mi-test/added_IVF3042_Flat_nprobe_1.index"
+        )
         print("    arg 5) speaker id: 0")
         print("    arg 6) transposition: 0")
-        print("    arg 7) f0 method: harvest (pm, harvest, crepe, crepe-tiny, hybrid[x,x,x,x], mangio-crepe, mangio-crepe-tiny)")
+        print(
+            "    arg 7) f0 method: harvest (pm, harvest, crepe, crepe-tiny, hybrid[x,x,x,x], mangio-crepe, mangio-crepe-tiny)"
+        )
         print("    arg 8) crepe hop length: 160")
         print("    arg 9) harvest median filter radius: 3 (0-7)")
         print("    arg 10) post resample rate: 0")
         print("    arg 11) mix volume envelope: 1")
         print("    arg 12) feature index ratio: 0.78 (0-1)")
-        print("    arg 13) Voiceless Consonant Protection (Less Artifact): 0.33 (Smaller number = more protection. 0.50 means Dont Use.) \n")
-        print("Example: mi-test.pth saudio/Sidney.wav myTest.wav logs/mi-test/added_index.index 0 -2 harvest 160 3 0 1 0.95 0.33")
+        print(
+            "    arg 13) Voiceless Consonant Protection (Less Artifact): 0.33 (Smaller number = more protection. 0.50 means Dont Use.) \n"
+        )
+        print(
+            "Example: mi-test.pth saudio/Sidney.wav myTest.wav logs/mi-test/added_index.index 0 -2 harvest 160 3 0 1 0.95 0.33"
+        )
     elif cli_current_page == "PRE-PROCESS":
         print("    arg 1) Model folder name in ./logs: mi-test")
         print("    arg 2) Trainset directory: mydataset (or) E:\\my-data-set")
@@ -1533,8 +1561,12 @@ def print_page_details():
         print("    arg 7) Batch size: 8")
         print("    arg 8) Gpu card slot: 0 (0-1-2 if using 3 GPUs)")
         print("    arg 9) Save only the latest checkpoint: 0 (0 for no, 1 for yes)")
-        print("    arg 10) Whether to cache training set to vram: 0 (0 for no, 1 for yes)")
-        print("    arg 11) Save extracted small model every generation?: 0 (0 for no, 1 for yes)")
+        print(
+            "    arg 10) Whether to cache training set to vram: 0 (0 for no, 1 for yes)"
+        )
+        print(
+            "    arg 11) Save extracted small model every generation?: 0 (0 for no, 1 for yes)"
+        )
         print("    arg 12) Model architecture version: v2 (use either v1 or v2)\n")
         print("Example: mi-test 40k 1 0 50 10000 8 0 0 0 0 v2")
     elif cli_current_page == "TRAIN-FEATURE":
@@ -1548,13 +1580,17 @@ def print_page_details():
         print("    arg 4) Has Pitch Guidance?: 1 (0 for no, 1 for yes)")
         print('    arg 5) Model information: "My Model"')
         print("    arg 6) Model architecture version: v2 (use either v1 or v2)\n")
-        print('Example: logs/mi-test/G_168000.pth MyModel 40k 1 "Created by Cole Mangio" v2')
+        print(
+            'Example: logs/mi-test/G_168000.pth MyModel 40k 1 "Created by Cole Mangio" v2'
+        )
     print("")
+
 
 def change_page(page):
     global cli_current_page
     cli_current_page = page
     return 0
+
 
 def execute_command(com):
     if com == "go home":
@@ -1575,7 +1611,7 @@ def execute_command(com):
         if com[:3] == "go ":
             print("page '%s' does not exist!" % com[3:])
             return 0
-    
+
     if cli_current_page == "INFER":
         cli_infer(com)
     elif cli_current_page == "PRE-PROCESS":
@@ -1589,6 +1625,7 @@ def execute_command(com):
     elif cli_current_page == "EXTRACT-MODEL":
         cli_extract_model(com)
 
+
 def cli_navigation_loop():
     while True:
         print("You are currently in '%s':" % cli_current_page)
@@ -1599,24 +1636,29 @@ def cli_navigation_loop():
         except:
             print(traceback.format_exc())
 
-if(config.is_cli):
+
+if config.is_cli:
     print("\n\nMangio-RVC-Fork v2 CLI App!\n")
-    print("Welcome to the CLI version of RVC. Please read the documentation on https://github.com/Mangio621/Mangio-RVC-Fork (README.MD) to understand how to use this app.\n")
+    print(
+        "Welcome to the CLI version of RVC. Please read the documentation on https://github.com/Mangio621/Mangio-RVC-Fork (README.MD) to understand how to use this app.\n"
+    )
     cli_navigation_loop()
 
-#endregion
+# endregion
 
-#region RVC WebUI App
+# region RVC WebUI App
+
 
 def get_presets():
     data = None
-    with open('../inference-presets.json', 'r') as file:
+    with open("../inference-presets.json", "r") as file:
         data = json.load(file)
     preset_names = []
-    for preset in data['presets']:
-        preset_names.append(preset['name'])
-    
+    for preset in data["presets"]:
+        preset_names.append(preset["name"])
+
     return preset_names
+
 
 with gr.Blocks(theme=gr.themes.Soft()) as app:
     gr.HTML("<h1> The Mangio-RVC-Fork by ba1yya 🤓🥰 </h1>")
@@ -1667,7 +1709,16 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             label=i18n(
                                 "选择音高提取算法,输入歌声可用pm提速,harvest低音好但巨慢无比,crepe效果好但吃GPU"
                             ),
-                            choices=["pm", "harvest", "dio", "crepe", "crepe-tiny", "mangio-crepe", "mangio-crepe-tiny", "rmvpe"], # Fork Feature. Add Crepe-Tiny
+                            choices=[
+                                "pm",
+                                "harvest",
+                                "dio",
+                                "crepe",
+                                "crepe-tiny",
+                                "mangio-crepe",
+                                "mangio-crepe-tiny",
+                                "rmvpe",
+                            ],  # Fork Feature. Add Crepe-Tiny
                             value="pm",
                             interactive=True,
                         )
@@ -1677,7 +1728,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             step=1,
                             label=i18n("crepe_hop_length"),
                             value=120,
-                            interactive=True
+                            interactive=True,
                         )
                         filter_radius0 = gr.Slider(
                             minimum=0,
@@ -1760,7 +1811,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             resample_sr0,
                             rms_mix_rate0,
                             protect0,
-                            crepe_hop_length
+                            crepe_hop_length,
                         ],
                         [vc_output1, vc_output2],
                     )
@@ -1888,7 +1939,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                 inputs=[sid0, protect0, protect1],
                 outputs=[spk_item, protect0, protect1],
             )
-       
+
         with gr.TabItem(i18n("训练")):
             gr.Markdown(
                 value=i18n(
@@ -1962,7 +2013,13 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             label=i18n(
                                 "选择音高提取算法:输入歌声可用pm提速,高质量语音但CPU差可用dio提速,harvest质量更好但慢"
                             ),
-                            choices=["pm", "harvest", "dio", "crepe", "mangio-crepe"], # Fork feature: Crepe on f0 extraction for training.
+                            choices=[
+                                "pm",
+                                "harvest",
+                                "dio",
+                                "crepe",
+                                "mangio-crepe",
+                            ],  # Fork feature: Crepe on f0 extraction for training.
                             value="harvest",
                             interactive=True,
                         )
@@ -1972,13 +2029,21 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             step=1,
                             label=i18n("crepe_hop_length"),
                             value=64,
-                            interactive=True
+                            interactive=True,
                         )
                     but2 = gr.Button(i18n("特征提取"), variant="primary")
                     info2 = gr.Textbox(label=i18n("输出信息"), value="", max_lines=8)
                     but2.click(
                         extract_f0_feature,
-                        [gpus6, np7, f0method8, if_f0_3, exp_dir1, version19, extraction_crepe_hop_length],
+                        [
+                            gpus6,
+                            np7,
+                            f0method8,
+                            if_f0_3,
+                            exp_dir1,
+                            version19,
+                            extraction_crepe_hop_length,
+                        ],
                         [info2],
                     )
             with gr.Group():
@@ -2104,16 +2169,12 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
                             if_cache_gpu17,
                             if_save_every_weights18,
                             version19,
-                            extraction_crepe_hop_length
+                            extraction_crepe_hop_length,
                         ],
                         info3,
                     )
 
-
-
-
-
-    #region Mangio Preset Handler Region
+    # region Mangio Preset Handler Region
     def save_preset(
         preset_name,
         sid0,
@@ -2128,44 +2189,43 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
         resample_sr,
         rms_mix_rate,
         protect,
-        f0_file
+        f0_file,
     ):
         data = None
-        with open('../inference-presets.json', 'r') as file:
+        with open("../inference-presets.json", "r") as file:
             data = json.load(file)
         preset_json = {
-            'name': preset_name,
-            'model': sid0,
-            'transpose': vc_transform,
-            'audio_file': input_audio,
-            'f0_method': f0method,
-            'crepe_hop_length': crepe_hop_length,
-            'median_filtering': filter_radius,
-            'feature_path': file_index1,
-            'auto_feature_path': file_index2,
-            'search_feature_ratio': index_rate,
-            'resample': resample_sr,
-            'volume_envelope': rms_mix_rate,
-            'protect_voiceless': protect,
-            'f0_file_path': f0_file
+            "name": preset_name,
+            "model": sid0,
+            "transpose": vc_transform,
+            "audio_file": input_audio,
+            "f0_method": f0method,
+            "crepe_hop_length": crepe_hop_length,
+            "median_filtering": filter_radius,
+            "feature_path": file_index1,
+            "auto_feature_path": file_index2,
+            "search_feature_ratio": index_rate,
+            "resample": resample_sr,
+            "volume_envelope": rms_mix_rate,
+            "protect_voiceless": protect,
+            "f0_file_path": f0_file,
         }
-        data['presets'].append(preset_json)
-        with open('../inference-presets.json', 'w') as file:
+        data["presets"].append(preset_json)
+        with open("../inference-presets.json", "w") as file:
             json.dump(data, file)
             file.flush()
         print("Saved Preset %s into inference-presets.json!" % preset_name)
 
-
     def on_preset_changed(preset_name):
         print("Changed Preset to %s!" % preset_name)
         data = None
-        with open('../inference-presets.json', 'r') as file:
+        with open("../inference-presets.json", "r") as file:
             data = json.load(file)
 
         print("Searching for " + preset_name)
         returning_preset = None
-        for preset in data['presets']:
-            if(preset['name'] == preset_name):
+        for preset in data["presets"]:
+            if preset["name"] == preset_name:
                 print("Found a preset")
                 returning_preset = preset
         # return all new input values
@@ -2185,11 +2245,11 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
             # returning_preset['f0_file_path']
         )
 
-    # Preset State Changes                
-    
+    # Preset State Changes
+
     # This click calls save_preset that saves the preset into inference-presets.json with the preset name
     # mangio_preset_save_btn.click(
-    #     fn=save_preset, 
+    #     fn=save_preset,
     #     inputs=[
     #         mangio_preset_name_save,
     #         sid0,
@@ -2205,16 +2265,16 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
     #         rms_mix_rate0,
     #         protect0,
     #         f0_file
-    #     ], 
+    #     ],
     #     outputs=[]
     # )
 
     # mangio_preset.change(
-    #     on_preset_changed, 
+    #     on_preset_changed,
     #     inputs=[
     #         # Pass inputs here
     #         mangio_preset
-    #     ], 
+    #     ],
     #     outputs=[
     #         # Pass Outputs here. These refer to the gradio elements that we want to directly change
     #         # sid0,
@@ -2232,14 +2292,16 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
     #         # f0_file
     #     ]
     # )
-    #endregion
+    # endregion
 
-        # with gr.TabItem(i18n("招募音高曲线前端编辑器")):
-        #     gr.Markdown(value=i18n("加开发群联系我xxxxx"))
-        # with gr.TabItem(i18n("点击查看交流、问题反馈群号")):
-        #     gr.Markdown(value=i18n("xxxxx"))
+    # with gr.TabItem(i18n("招募音高曲线前端编辑器")):
+    #     gr.Markdown(value=i18n("加开发群联系我xxxxx"))
+    # with gr.TabItem(i18n("点击查看交流、问题反馈群号")):
+    #     gr.Markdown(value=i18n("xxxxx"))
 
-    if config.iscolab or config.paperspace: # Share gradio link for colab and paperspace (FORK FEATURE)
+    if (
+        config.iscolab or config.paperspace
+    ):  # Share gradio link for colab and paperspace (FORK FEATURE)
         app.queue(concurrency_count=511, max_size=1022).launch(share=True)
     else:
         app.queue(concurrency_count=511, max_size=1022).launch(
@@ -2249,4 +2311,4 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
             quiet=True,
         )
 
-#endregion
+# endregion

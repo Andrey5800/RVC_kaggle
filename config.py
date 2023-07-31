@@ -32,7 +32,7 @@ class Config:
             self.paperspace,
             self.is_cli,
         ) = self.arg_parse()
-        
+
         self.x_pad, self.x_query, self.x_center, self.x_max = self.device_config()
 
     @staticmethod
@@ -50,11 +50,15 @@ class Config:
             action="store_true",
             help="Do not open in browser automatically",
         )
-        parser.add_argument( # Fork Feature. Paperspace integration for web UI
-            "--paperspace", action="store_true", help="Note that this argument just shares a gradio link for the web UI. Thus can be used on other non-local CLI systems."
+        parser.add_argument(  # Fork Feature. Paperspace integration for web UI
+            "--paperspace",
+            action="store_true",
+            help="Note that this argument just shares a gradio link for the web UI. Thus can be used on other non-local CLI systems.",
         )
-        parser.add_argument( # Fork Feature. Embed a CLI into the infer-web.py
-            "--is_cli", action="store_true", help="Use the CLI instead of setting up a gradio UI. This flag will launch an RVC text interface where you can execute functions from infer-web.py!"
+        parser.add_argument(  # Fork Feature. Embed a CLI into the infer-web.py
+            "--is_cli",
+            action="store_true",
+            help="Use the CLI instead of setting up a gradio UI. This flag will launch an RVC text interface where you can execute functions from infer-web.py!",
         )
         cmd_opts = parser.parse_args()
 

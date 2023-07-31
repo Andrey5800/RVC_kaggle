@@ -97,12 +97,14 @@ class PreProcess:
                         idx1 += 1
                         break
                 self.norm_write(tmp_audio, idx0, idx1)
-            #println("%s->Suc." % path)
+            # println("%s->Suc." % path)
         except:
             println("%s->%s" % (path, traceback.format_exc()))
 
     def pipeline_mp(self, infos, thread_n):
-        for path, idx0 in tqdm.tqdm(infos, position=thread_n, leave=True, desc="thread:%s" % thread_n):
+        for path, idx0 in tqdm.tqdm(
+            infos, position=thread_n, leave=True, desc="thread:%s" % thread_n
+        ):
             self.pipeline(path, idx0)
 
     def pipeline_mp_inp_dir(self, inp_root, n_p):
